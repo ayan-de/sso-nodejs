@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { createHash } from 'crypto';
+import { User, SSOApplication, SSOSession } from './types/sso';
 
 dotenv.config();
 
@@ -13,31 +14,6 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Types
-interface User {
-    id: string;
-    email: string;
-    name: string;
-    picture?: string;
-    googleId?: string;
-}
-
-interface SSOApplication {
-    id: string;
-    name: string;
-    redirectUrl: string;
-    secret: string;
-}
-
-interface SSOSession {
-    sessionId: string;
-    userId: string;
-    email: string;
-    name: string;
-    createdAt: Date;
-    expiresAt: Date;
-}
 
 // In-memory user store (replace with database in production)
 const users: Map<string, User> = new Map();
