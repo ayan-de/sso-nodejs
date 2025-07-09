@@ -38,7 +38,7 @@ const registeredApps = new Map([
 ]);
 // Session configuration
 app.use((0, express_session_1.default)({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    secret: process.env.SESSION_SECRET || 'secretkeyformyssonodejsapp',
     resave: false,
     saveUninitialized: false,
     store: process.env.NODE_ENV === 'production' ? undefined : new express_session_1.default.MemoryStore(),
