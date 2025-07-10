@@ -1,6 +1,6 @@
 import express from 'express';
 import passport from 'passport';
-import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
+import googleAuthRouter from './auth/google';
 import session from 'express-session';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -16,11 +16,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // In-memory user store (replace with database in production)
-const users: Map<string, User> = new Map();
-const ssoSessions: Map<string, SSOSession> = new Map();
+export const users: Map<string, User> = new Map();
+export const ssoSessions: Map<string, SSOSession> = new Map();
 
 // Registered applications that can use our SSO
-const registeredApps: Map<string, SSOApplication> = new Map([
+export const registeredApps: Map<string, SSOApplication> = new Map([
     ['app1', {
         id: 'app1',
         name: 'Blog Application',
@@ -51,56 +51,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Google OAuth Strategy
-passport.use(
-    new GoogleStrategy(
-        {
-            clientID: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-            callbackURL: '/auth/google/callback',
-            passReqToCallback: true,
-        },
-        async (
-            req: express.Request,
-            accessToken: string,
-            refreshToken: string,
-            profile: Profile,
-            done: any
-        ) => {
-            try {
-                const email = profile.emails?.[0]?.value;
-                if (!email) {
-                    return done(new Error("Email not found"), null);
-                }
-                let user = Array.from(users.values()).find(
-                    (user) => user.email === email
-                );
-
-                if (user) {
-                    // Update existing user
-                    user.name = profile.displayName;
-                    user.picture = profile.photos?.[0]?.value;
-                    users.set(user.id, user);
-                    return done(null, user);
-                }
-
-                // Create new user
-                const newUser: User = {
-                    id: Date.now().toString(), // Use UUID in production
-                    email: email,
-                    name: profile.displayName,
-                    picture: profile.photos?.[0]?.value,
-                    googleId: profile.id,
-                };
-
-                users.set(newUser.id, newUser);
-                return done(null, newUser);
-            } catch (error) {
-                return done(error, null);
-            }
-        }
-    )
-);
 
 // Serialize user for session
 passport.serializeUser((user: any, done) => {
@@ -269,7 +219,7 @@ function findActiveSession(req: express.Request): SSOSession | null {
     return session;
 }
 
-function generateSSOToken(session: SSOSession, app: SSOApplication): string {
+export function generateSSOToken(session: SSOSession, app: SSOApplication): string {
     return jwt.sign({
         sessionId: session.sessionId,
         userId: session.userId,
@@ -281,7 +231,7 @@ function generateSSOToken(session: SSOSession, app: SSOApplication): string {
     }, app.secret);
 }
 
-function generateSessionId(): string {
+export function generateSessionId(): string {
     return createHash('sha256')
         .update(Math.random().toString() + Date.now().toString())
         .digest('hex');
@@ -321,48 +271,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// Start OAuth flow
-app.get('/auth/google', passport.authenticate('google', {
-    scope: ['profile', 'email']
-}));
-
-// OAuth callback
-app.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
-    (req, res) => {
-        const { redirect_uri, state } = req.query;
-        const user = req.user as User;
-
-        // Create SSO session
-        const sessionId = generateSessionId();
-        const session: SSOSession = {
-            sessionId,
-            userId: user.id,
-            email: user.email,
-            name: user.name,
-            createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-        };
-        ssoSessions.set(sessionId, session);
-
-        // Set SSO session cookie
-        res.cookie('sso_session', sessionId, {
-            httpOnly: true,
-            secure: false, // true in production
-            maxAge: 24 * 60 * 60 * 1000,
-        });
-
-        if (typeof redirect_uri === 'string' && typeof state === 'string') {
-            const app = Array.from(registeredApps.values()).find(a => a.redirectUrl === redirect_uri);
-            if (app) {
-                const token = generateSSOToken(session, app);
-                return res.redirect(`${redirect_uri}?token=${token}&state=${state}`);
-            }
-        }
-
-        res.redirect('/');
-    }
-);
+app.use(googleAuthRouter);
 
 // Protected route - user profile
 app.get('/profile', isAuthenticated, (req, res) => {
