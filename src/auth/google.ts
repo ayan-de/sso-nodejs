@@ -2,7 +2,11 @@ import express from 'express';
 import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 import { User, SSOSession, SSOApplication } from '../types/sso';
-import { users, ssoSessions, registeredApps, generateSSOToken, generateSessionId } from '../server';
+import { users, ssoSessions, registeredApps } from '../store';
+import { generateSSOToken, generateSessionId } from '../services/sso';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -28,7 +32,7 @@ passport.use(
                     return done(new Error("Email not found"), null);
                 }
                 let user: User | undefined = Array.from(users.values()).find(
-                    (user: User) => user.email === email
+                    (user) => user.email === email
                 );
 
                 if (user) {
@@ -89,7 +93,7 @@ router.get('/auth/google/callback',
         });
 
         if (typeof redirect_uri === 'string' && typeof state === 'string') {
-            const app = Array.from(registeredApps.values()).find((a: SSOApplication) => a.redirectUrl === redirect_uri);
+            const app = Array.from(registeredApps.values()).find((a) => a.redirectUrl === redirect_uri);
             if (app) {
                 const token = generateSSOToken(session, app);
                 return res.redirect(`${redirect_uri}?token=${token}&state=${state}`);

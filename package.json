@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "tsc",
-    "dev": "nodemon -r dotenv/config src/server.ts"
+    "dev": "nodemon -r dotenv/config src/server.ts",
+    "dev:all": "npm run dev & ts-node -r dotenv/config src/client1.ts & ts-node -r dotenv/config src/client2.ts"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,19 @@
+{
+  "src/store/index.ts": "For in-memory data stores (users, ssoSessions, registeredApps).",
+  "src/config/passport.ts": "For all Passport.js configuration.",
+  "src/services/auth.ts": "For authentication middleware and JWT generation.",
+  "src/services/sso.ts": "For SSO-related helper functions.",
+  "src/routes/sso.ts": "For all /sso/* routes.",
+  "src/routes/index.ts": "For all other application routes.",
+  "src/server.ts": "The main server file",
+  "dist/auth": "TODO: Add description",
+  "dist/auth/index.js": "TODO: Add description",
+  "dist/config": "TODO: Add description",
+  "dist/lib": "TODO: Add description",
+  "dist/routes": "TODO: Add description",
+  "dist/routes/index.js": "TODO: Add description",
+  "dist/routes/sso.js": "TODO: Add description",
+  "dist/services": "TODO: Add description",
+  "dist/services/auth.js": "TODO: Add description",
+  "dist/store": "TODO: Add description"
+}
