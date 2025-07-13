@@ -7,7 +7,7 @@ import { SSOSession } from '../types/sso';
 
 const router = express.Router();
 
-// 1. SSO Login Endpoint - Apps redirect users here
+// 1. SSO Login Endpoint - Apps redirect users here /sso/login
 router.get('/login', (req, res) => {
     const { app_id, redirect_uri, state } = req.query;
 
@@ -55,7 +55,7 @@ router.get('/login', (req, res) => {
     `);
 });
 
-// 2. SSO Authentication Handler
+// 2. SSO Authentication Handler  /sso/authenticate
 router.post('/authenticate', (req, res) => {
     const { email, password, app_id, redirect_uri, state } = req.body;
 
@@ -97,7 +97,7 @@ router.post('/authenticate', (req, res) => {
     res.redirect(`${redirect_uri}?token=${token}&state=${state}`);
 });
 
-// 3. SSO Token Validation Endpoint
+// 3. SSO Token Validation Endpoint /sso/validate
 router.post('/validate', (req, res) => {
     const { token, app_id } = req.body;
 

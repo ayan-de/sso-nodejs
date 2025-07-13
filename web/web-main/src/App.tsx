@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FaGoogle } from "react-icons/fa";
 import "./App.css";
 
 interface User {
@@ -54,7 +55,10 @@ function App() {
               window.location.href = "http://localhost:5000/auth/google";
             }}
           >
-            Sign in with Google
+            <div className="flex flex-row items-center gap-3">
+              <FaGoogle />
+              <h2>Sign in with Google</h2>
+            </div>
           </button>
         </>
       )}

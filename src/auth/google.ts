@@ -62,11 +62,12 @@ passport.use(
 );
 
 // Start OAuth flow
+// It redirects the user to Google's login page, asking for email and profile access.
 router.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
 
-// OAuth callback
+// OAuth callback (Google redirects here after login)
 router.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/' }),
     (req, res) => {
@@ -83,6 +84,8 @@ router.get('/auth/google/callback',
             createdAt: new Date(),
             expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
         };
+
+        //later to be stored in Redis
         ssoSessions.set(sessionId, session);
 
         // Set SSO session cookie
