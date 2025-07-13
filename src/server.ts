@@ -6,10 +6,18 @@ import passport from './config/passport';
 import ssoRoutes from './routes/sso';
 import mainRoutes from './routes/index';
 import { SSOClient } from './lib/sso-client';
+import cors from 'cors';
+
+const app = express();
+
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
+
 
 dotenv.config();
 
-const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
