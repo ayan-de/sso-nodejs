@@ -103,7 +103,8 @@ router.get('/auth/google/callback',
             }
         }
 
-        res.redirect('/');
+        res.redirect(process.env.FRONTEND_URL_1 || '/');
+        // res.redirect('http://localhost:5173/')
     }
 );
 
