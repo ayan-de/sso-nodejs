@@ -13,9 +13,14 @@ const sso_1 = __importDefault(require("./routes/sso"));
 const index_1 = __importDefault(require("./routes/index"));
 const sso_client_1 = require("./lib/sso-client");
 Object.defineProperty(exports, "SSOClient", { enumerable: true, get: function () { return sso_client_1.SSOClient; } });
-dotenv_1.default.config();
+const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 exports.app = app;
+app.use((0, cors_1.default)({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
+dotenv_1.default.config();
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));

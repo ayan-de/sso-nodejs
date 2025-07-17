@@ -47,10 +47,11 @@ passport_1.default.use(new passport_google_oauth20_1.Strategy({
     }
 }));
 // Start OAuth flow
+// It redirects the user to Google's login page, asking for email and profile access.
 router.get('/auth/google', passport_1.default.authenticate('google', {
     scope: ['profile', 'email']
 }));
-// OAuth callback
+// OAuth callback (Google redirects here after login)
 router.get('/auth/google/callback', passport_1.default.authenticate('google', { failureRedirect: '/' }), (req, res) => {
     const { redirect_uri, state } = req.query;
     const user = req.user;
@@ -64,6 +65,7 @@ router.get('/auth/google/callback', passport_1.default.authenticate('google', { 
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
     };
+    //later to be stored in Redis
     store_1.ssoSessions.set(sessionId, session);
     // Set SSO session cookie
     res.cookie('sso_session', sessionId, {
@@ -78,6 +80,7 @@ router.get('/auth/google/callback', passport_1.default.authenticate('google', { 
             return res.redirect(`${redirect_uri}?token=${token}&state=${state}`);
         }
     }
-    res.redirect('/');
+    res.redirect(process.env.FRONTEND_URL_1 || '/');
+    // res.redirect('http://localhost:5173/')
 });
 exports.default = router;
