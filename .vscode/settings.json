@@ -4,5 +4,6 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"
-  }
-} 
+  },
+  "postman.settings.dotenv-detection-notification-visibility": false
+}
