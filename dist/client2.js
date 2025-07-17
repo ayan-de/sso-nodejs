@@ -3,15 +3,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const express_session_1 = __importDefault(require("express-session"));
 const server_1 = require("./server");
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)({
+    origin: 'http://localhost:5175',
+    credentials: true,
+}));
 app.use((0, express_session_1.default)({
     secret: 'client2-secret',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { secure: false },
 }));
 const ssoClient = new server_1.SSOClient('app2', 'app2-secret', 'http://localhost:5000');
 app.get('/login', (req, res) => {
@@ -43,6 +48,21 @@ app.get('/dashboard', (req, res) => {
     else {
         res.redirect('/login');
     }
+});
+app.get('/logout', async (req, res) => {
+    // Destroy local session
+    req.session.destroy(() => {
+        // Call SSO server logout to clear global session
+        // Use fetch or any HTTP client
+        fetch('http://localhost:5000/logout', {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+        }).finally(() => {
+            res.clearCookie('sso_session');
+            res.redirect('/login');
+        });
+    });
 });
 const PORT = 3002;
 app.listen(PORT, () => {
